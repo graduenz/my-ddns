@@ -1,6 +1,14 @@
-# Cloudflare DDNS Updater (.NET)
+# My DDNS
 
-.NET tool to implement Dynamic DNS on Cloudflare using their API.
+.NET tool to implement Dynamic DNS and continually update DNS entries on your own.
+
+## Stage
+
+Actively on development &horbar; no release yet.
+
+## Supported registrars
+
+For now, only Cloudflare is supported.
 
 ## Credits
 
