@@ -1,6 +1,6 @@
 ﻿using MyDDNS.Core.Dns;
 
-namespace MyDDNS.Cloudflare.Configuration;
+namespace MyDDNS.Registrar.Cloudflare.Configuration;
 
 public class CloudflareDnsConfiguration : IDnsConfiguration
 {

@@ -1,4 +1,4 @@
-﻿namespace MyDDNS.Cloudflare.Configuration;
+﻿namespace MyDDNS.Registrar.Cloudflare.Configuration;
 
 public class AuthConfiguration
 {

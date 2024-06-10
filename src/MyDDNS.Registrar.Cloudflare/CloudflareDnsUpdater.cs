@@ -1,15 +1,13 @@
-﻿using MyDDNS.Cloudflare.Configuration;
-using MyDDNS.Core.Dns;
+﻿using MyDDNS.Core.Dns;
+using MyDDNS.Registrar.Cloudflare.Configuration;
 
-namespace MyDDNS.Cloudflare;
+namespace MyDDNS.Registrar.Cloudflare;
 
 public class CloudflareDnsUpdater : IDnsUpdater
 {
     public Task UpdateDnsAsync(IDnsConfiguration configuration)
     {
-        var providerSpecificConfiguration = configuration as CloudflareDnsConfiguration;
-
-        if (providerSpecificConfiguration is null)
+        if (configuration is not CloudflareDnsConfiguration providerSpecificConfiguration)
             throw new ArgumentException(
                 $"Configuration for Cloudflare DNS updater must be an instance of {nameof(CloudflareDnsConfiguration)}",
                 nameof(configuration));
