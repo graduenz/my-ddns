@@ -1,12 +1,10 @@
-﻿using System.Net;
-using MyDDNS.Core.IP;
+﻿namespace MyDDNS.IP.ThirdParty;
 
-namespace MyDDNS.IP.ThirdParty;
-
-public class IpifyIpAddressFetchStrategy : IIpAddressFetchStrategy
+public class IpifyIpAddressFetchStrategy : HttpIpAddressFetchStrategy
 {
-    public Task<IPAddress> GetIpAddressAsync()
+    public IpifyIpAddressFetchStrategy(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
     {
-        throw new NotImplementedException();
     }
+
+    protected override Uri GetServiceUri() => new Uri("https://api.ipify.org");
 }

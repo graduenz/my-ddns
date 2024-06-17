@@ -1,12 +1,10 @@
-﻿using System.Net;
-using MyDDNS.Core.IP;
+﻿namespace MyDDNS.IP.ThirdParty;
 
-namespace MyDDNS.IP.ThirdParty;
-
-public class IcanhazIpAddressFetchStrategy : IIpAddressFetchStrategy
+public class IcanhazIpAddressFetchStrategy : HttpIpAddressFetchStrategy
 {
-    public Task<IPAddress> GetIpAddressAsync()
+    public IcanhazIpAddressFetchStrategy(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
     {
-        throw new NotImplementedException();
     }
+
+    protected override Uri GetServiceUri() => new Uri("https://ipv4.icanhazip.com");
 }
