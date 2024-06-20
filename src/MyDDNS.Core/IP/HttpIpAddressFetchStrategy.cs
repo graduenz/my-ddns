@@ -2,12 +2,12 @@
 
 namespace MyDDNS.Core.IP;
 
-public class HttpIpAddressProvider : IIpAddressProvider
+public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IEnumerable<Uri> _ipProviders;
 
-    protected HttpIpAddressProvider(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
+    protected HttpIpAddressFetchStrategy(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
     {
         _httpClientFactory = httpClientFactory;
         _ipProviders = ipProviders;
