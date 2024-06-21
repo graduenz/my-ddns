@@ -11,7 +11,7 @@ public class DefaultIpAddressProviderTests
     public void Ctor_WhenNullParams_Throws()
     {
         // Act
-        var act = () => new DefaultIpAddressProvider(null);
+        var act = () => new DefaultIpAddressProvider(null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
