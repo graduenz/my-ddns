@@ -8,7 +8,10 @@ public class DefaultIpAddressProvider : IIpAddressProvider
 
     public DefaultIpAddressProvider(IEnumerable<IIpAddressFetchStrategy> fetchStrategies)
     {
-        _fetchStrategies = fetchStrategies;
+        _fetchStrategies = fetchStrategies ?? throw new ArgumentNullException(nameof(fetchStrategies));
+        
+        if (!fetchStrategies.Any())
+            throw new ArgumentException("At least one IP fetch strategy must be specified.", nameof(fetchStrategies));
     }
     
     public async Task<IPAddress> GetIpAddressAsync()
