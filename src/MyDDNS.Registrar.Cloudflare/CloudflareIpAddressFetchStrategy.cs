@@ -8,14 +8,14 @@ public partial class CloudflareIpAddressFetchStrategy : IIpAddressFetchStrategy
 {
     private static readonly Uri CloudflareTraceUri = new("https://cloudflare.com/cdn-cgi/trace");
     
-    [GeneratedRegex(@"ip=(?<ip>.+)")]
+    [GeneratedRegex(@"ip=(?<ip>(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})")]
     private static partial Regex IpExtractRegex();
     
     private readonly IHttpClientFactory _httpClientFactory;
 
-    protected CloudflareIpAddressFetchStrategy(IHttpClientFactory httpClientFactory)
+    public CloudflareIpAddressFetchStrategy(IHttpClientFactory httpClientFactory)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
     
     public async Task<IPAddress> GetIpAddressAsync()
@@ -26,8 +26,8 @@ public partial class CloudflareIpAddressFetchStrategy : IIpAddressFetchStrategy
         var match = IpExtractRegex().Match(traceResponseText);
         var success = match.Success && match.Groups["ip"].Success;
 
-        return success
-            ? IPAddress.Parse(match.Groups["ip"].Value)
+        return success && IPAddress.TryParse(match.Groups["ip"].Value, out var ip)
+            ? ip
             : IPAddress.None;
     }
 }
