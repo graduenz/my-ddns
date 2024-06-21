@@ -19,7 +19,7 @@ PROJECT_VERSION=$2
 echo "### Beginning sonarscanner..."
 
 # You should start the scanner prior building your project and running your tests
-dotnet sonarscanner begin \
+.sonar/scanner/dotnet-sonarscanner begin \
     /k:"graduenz_my-ddns" \
     /o:"graduenz" \
     /d:sonar.token="$SONAR_TOKEN" \
@@ -34,4 +34,4 @@ dotnet build
 ./scripts/start-tests.sh
 
 # Now we can collect the results 👍
-dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
