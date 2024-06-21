@@ -10,16 +10,15 @@ public class HttpIpAddressFetchStrategyTests
 {
     private const string TestIp = "10.10.10.10";
 
-    public static object[][] HttpIpAddressFetchStrategy_WhenNullCtorParams_Throws_Data =>
+    public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [
         [CreateHttpClientFactoryMock().Object, null!],
         [null!, GetTestIpProviders()]
     ];
 
     [Theory]
-    [MemberData(nameof(HttpIpAddressFetchStrategy_WhenNullCtorParams_Throws_Data))]
-    public void HttpIpAddressFetchStrategy_WhenNullCtorParams_Throws(IHttpClientFactory httpClientFactory,
-        IEnumerable<Uri> ipProviders)
+    [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
+    public void Ctor_WhenNullParams_Throws(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
     {
         // Act
         var act = () => new HttpIpAddressFetchStrategy(httpClientFactory, ipProviders);
@@ -29,7 +28,7 @@ public class HttpIpAddressFetchStrategyTests
     }
 
     [Fact]
-    public void HttpIpAddressFetchStrategy_WhenEmptyIpProviders_Throws()
+    public void Ctor_WhenEmptyIpProviders_Throws()
     {
         // Act
         var act = () => new HttpIpAddressFetchStrategy(CreateHttpClientFactoryMock().Object, new List<Uri>());
