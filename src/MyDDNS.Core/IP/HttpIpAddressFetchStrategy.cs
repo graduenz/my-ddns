@@ -9,8 +9,11 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
 
     public HttpIpAddressFetchStrategy(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
     {
-        _httpClientFactory = httpClientFactory;
-        _ipProviders = ipProviders;
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _ipProviders = ipProviders ?? throw new ArgumentNullException(nameof(ipProviders));
+
+        if (!ipProviders.Any())
+            throw new ArgumentException("At least one IP provider must be specified.", nameof(ipProviders));
     }
 
     public async Task<IPAddress> GetIpAddressAsync()
@@ -23,8 +26,10 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
         });
 
         var firstCompletedIpFetchTask = await Task.WhenAny(ipFetchTasks);
-        var ip = await firstCompletedIpFetchTask;
+        var ipString = await firstCompletedIpFetchTask;
 
-        return IPAddress.Parse(ip);
+        return IPAddress.TryParse(ipString, out var ip)
+            ? IPAddress.None
+            : ip ?? IPAddress.None;
     }
 }
