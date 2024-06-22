@@ -1,6 +1,8 @@
-﻿namespace MyDDNS.Core.Dns;
+﻿using System.Net;
+
+namespace MyDDNS.Core.Dns;
 
 public interface IDnsUpdater
 {
-    Task UpdateDnsAsync(IDnsConfiguration configuration);
+    Task UpdateDnsAsync(IPAddress ip);
 }

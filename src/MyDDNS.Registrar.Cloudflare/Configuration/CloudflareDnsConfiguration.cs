@@ -2,7 +2,7 @@
 
 namespace MyDDNS.Registrar.Cloudflare.Configuration;
 
-public class CloudflareDnsConfiguration : IDnsConfiguration
+public class CloudflareDnsConfiguration
 {
     public List<DnsEntry>? Dns { get; set; }
     public AuthConfiguration? Auth { get; set; }
