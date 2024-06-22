@@ -4,7 +4,14 @@ namespace MyDDNS.Registrar.Cloudflare.Configuration;
 
 public class CloudflareDnsConfiguration
 {
-    public List<DnsEntry>? Dns { get; set; }
-    public AuthConfiguration? Auth { get; set; }
-    public string? ZoneIdentifier { get; set; }
+    public CloudflareDnsConfiguration(List<DnsEntry> dns, AuthConfiguration auth, string zoneIdentifier)
+    {
+        Dns = dns;
+        Auth = auth;
+        ZoneIdentifier = zoneIdentifier;
+    }
+
+    public List<DnsEntry> Dns { get; }
+    public AuthConfiguration Auth { get; }
+    public string ZoneIdentifier { get; }
 }

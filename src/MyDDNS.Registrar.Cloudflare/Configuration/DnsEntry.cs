@@ -2,7 +2,14 @@
 
 public class DnsEntry
 {
-    public string? Name { get; set; }
+    public DnsEntry(string name, bool proxied, int ttl)
+    {
+        Name = name;
+        Proxied = proxied;
+        Ttl = ttl;
+    }
+
+    public string Name { get; set; }
     public bool Proxied { get; set; }
     public int Ttl { get; set; }
 }
