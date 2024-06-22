@@ -1,6 +1,6 @@
 # My DDNS
 
-.NET tool to implement Dynamic DNS and continually update DNS entries on your own.
+.NET tool that implements Dynamic DNS and continually updates DNS entries on Cloudflare.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=graduenz_my-ddns&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=graduenz_my-ddns)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=graduenz_my-ddns&metric=bugs)](https://sonarcloud.io/summary/new_code?id=graduenz_my-ddns)
@@ -11,11 +11,11 @@
 
 ## Stage
 
-Actively on development &horbar; no release yet.
+On active development &horbar; no release yet.
 
 ## Supported registrars
 
-For now, only Cloudflare is supported.
+For now, only Cloudflare will be supported.
 
 ## Credits
 
