@@ -18,7 +18,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
 
     public DefaultCloudflareApiAdapter(IHttpClientFactory httpClientFactory, string authEmail, string authToken)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _authEmail = authEmail ?? throw new ArgumentNullException(nameof(authEmail));
         _authToken = authToken ?? throw new ArgumentNullException(nameof(authToken));
     }
