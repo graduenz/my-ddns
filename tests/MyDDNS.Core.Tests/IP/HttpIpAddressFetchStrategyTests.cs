@@ -63,7 +63,7 @@ public class HttpIpAddressFetchStrategyTests
         var ip = await strategy.GetIpAddressAsync();
 
         // Asset
-        ip.Should().Be(IPAddress.None);
+        ip.Should().BeEquivalentTo(IPAddress.Parse("10.10.10.10"));
     }
 
     private static List<Uri> GetTestIpProviders() =>

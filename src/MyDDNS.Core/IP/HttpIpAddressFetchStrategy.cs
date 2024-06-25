@@ -28,8 +28,6 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
         var firstCompletedIpFetchTask = await Task.WhenAny(ipFetchTasks);
         var ipString = await firstCompletedIpFetchTask;
 
-        return IPAddress.TryParse(ipString, out var ip)
-            ? IPAddress.None
-            : ip ?? IPAddress.None;
+        return IPAddress.TryParse(ipString, out var ip) ? ip : IPAddress.None;
     }
 }
