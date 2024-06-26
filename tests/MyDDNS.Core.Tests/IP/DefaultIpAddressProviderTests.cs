@@ -45,7 +45,7 @@ public class DefaultIpAddressProviderTests
 
         // Assert
         (await act.Should()
-                .ThrowAsync<InvalidOperationException>())
+            .ThrowAsync<InvalidOperationException>())
             .And.Message.Should().Be("Failed to fetch the IP address: None of the strategies succeeded.");
     }
 
