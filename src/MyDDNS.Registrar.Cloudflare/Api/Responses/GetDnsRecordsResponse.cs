@@ -2,8 +2,8 @@
 
 namespace MyDDNS.Registrar.Cloudflare.Api.Responses;
 
-public class PatchDnsRecordResponse
+public class GetDnsRecordsResponse
 {
-    public CloudflareDnsRecord? Result { get; set; }
+    public List<CloudflareDnsRecord>? Result { get; set; }
     public bool Success { get; set; }
 }

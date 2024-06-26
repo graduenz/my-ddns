@@ -21,9 +21,15 @@ public class CloudflareDnsUpdater : IDnsUpdater
     {
         foreach (var entry in _configuration.Dns)
         {
-            var dnsRecords = await _cloudflareApi.GetDnsRecordsAsync(_configuration.ZoneIdentifier, entry.Name);
+            var response = await _cloudflareApi.GetDnsRecordsAsync(_configuration.ZoneIdentifier, entry.Name);
 
-            foreach (var record in dnsRecords)
+            if (response?.Result == null)
+            {
+                // TODO: Log the problem
+                continue;
+            }
+
+            foreach (var record in response.Result)
             {
                 var payload = new PatchDnsRecordRequest {
                     // Entry settings from configuration
@@ -36,7 +42,8 @@ public class CloudflareDnsUpdater : IDnsUpdater
                     Type = record.Type
                 };
                 
-                await _cloudflareApi.PatchDnsRecord(_configuration.ZoneIdentifier, record.Id!, payload);
+                await _cloudflareApi.PatchDnsRecordAsync(_configuration.ZoneIdentifier, record.Id!, payload);
+                // TODO: Log if failed to patch
             }
         }
     }

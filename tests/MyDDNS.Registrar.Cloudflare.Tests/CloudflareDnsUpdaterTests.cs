@@ -45,7 +45,7 @@ public class CloudflareDnsUpdaterTests
             Times.Once);
 
         cloudflareApiMock.Verify(
-            m => m.PatchDnsRecord(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()),
+            m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()),
             Times.Once);
     }
 
@@ -68,17 +68,21 @@ public class CloudflareDnsUpdaterTests
 
         mock
             .Setup(m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync([
-                new CloudflareDnsRecord
-                    { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "11.11.11.11" }
-            ]);
+            .ReturnsAsync(new GetDnsRecordsResponse {
+                Result = [
+                    new CloudflareDnsRecord
+                        { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "11.11.11.11" }
+                ],
+                Success = true
+            });
 
         mock
-            .Setup(m => m.PatchDnsRecord(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()))
-            .ReturnsAsync(
-                new PatchDnsRecordResponse
-                    { Success = true, Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "10.10.10.10" }
-            );
+            .Setup(m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()))
+            .ReturnsAsync(new PatchDnsRecordResponse {
+                Result = new CloudflareDnsRecord
+                    { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "10.10.10.10" },
+                Success = true
+            });
 
         return mock;
     }

@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using MyDDNS.Registrar.Cloudflare.Api.Models;
 using MyDDNS.Registrar.Cloudflare.Api.Requests;
 using MyDDNS.Registrar.Cloudflare.Api.Responses;
 
@@ -23,29 +22,36 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         _authToken = authToken ?? throw new ArgumentNullException(nameof(authToken));
     }
 
-    public async Task<List<CloudflareDnsRecord>> GetDnsRecordsAsync(string zoneIdentifier, string recordName)
+    public async Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(string zoneIdentifier, string recordName)
     {
         var requestUri = $"{zoneIdentifier}/dns_records?type=A&name={recordName}";
-        
-        using var httpClient = GetCloudflareApiHttpClient();
-        var dnsRecords = await httpClient.GetFromJsonAsync<List<CloudflareDnsRecord>>(requestUri);
 
-        return dnsRecords ?? throw new InvalidOperationException("Could not GET any DNS record from Cloudflare");
+        using var httpClient = GetCloudflareApiHttpClient();
+        var response = await httpClient.GetAsync(requestUri);
+
+        EnsureHttpStatusSuccess(response);
+
+        return await response.Content.ReadFromJsonAsync<GetDnsRecordsResponse>();
     }
 
-    public async Task<PatchDnsRecordResponse> PatchDnsRecord(string zoneIdentifier, string recordId,
+    public async Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(string zoneIdentifier, string recordId,
         PatchDnsRecordRequest payload)
     {
         var requestUri = $"{zoneIdentifier}/dns_records/{recordId}";
-        
+
         using var httpClient = GetCloudflareApiHttpClient();
         var response = await httpClient.PatchAsJsonAsync(requestUri, payload);
 
-        var responseObject = response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<PatchDnsRecordResponse>()
-            : null;
+        EnsureHttpStatusSuccess(response);
 
-        return responseObject ?? throw new InvalidOperationException("Could not PATCH the DNS record on Cloudflare");
+        return await response.Content.ReadFromJsonAsync<PatchDnsRecordResponse>();
+    }
+
+    private static void EnsureHttpStatusSuccess(HttpResponseMessage? response)
+    {
+        if (response is not { IsSuccessStatusCode: true })
+            throw new InvalidOperationException(
+                $"Expected Cloudflare API response to have a success status code, but got {response?.StatusCode}.");
     }
 
     private HttpClient GetCloudflareApiHttpClient()

@@ -6,7 +6,7 @@ namespace MyDDNS.Registrar.Cloudflare.Api;
 
 public interface ICloudflareApiAdapter
 {
-    Task<List<CloudflareDnsRecord>> GetDnsRecordsAsync(string zoneIdentifier, string recordName);
+    Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(string zoneIdentifier, string recordName);
 
-    Task<PatchDnsRecordResponse> PatchDnsRecord(string zoneIdentifier, string recordId, PatchDnsRecordRequest payload);
+    Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(string zoneIdentifier, string recordId, PatchDnsRecordRequest payload);
 }
