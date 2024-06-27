@@ -10,24 +10,23 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
     private const string CloudflareApiAddress = "https://api.cloudflare.com/client/v4/";
 
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string _authEmail;
-    private readonly string _authToken;
 
     private HttpClient? _httpClient;
 
-    public DefaultCloudflareApiAdapter(IHttpClientFactory httpClientFactory, string authEmail, string authToken)
+    public DefaultCloudflareApiAdapter(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _authEmail = authEmail ?? throw new ArgumentNullException(nameof(authEmail));
-        _authToken = authToken ?? throw new ArgumentNullException(nameof(authToken));
     }
 
-    public async Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(string zoneIdentifier, string recordName,
+    public async Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(
+        string apiToken,
+        string zoneIdentifier,
+        string recordName,
         CancellationToken cancellationToken = default)
     {
         var requestUri = $"{zoneIdentifier}/dns_records?type=A&name={recordName}";
 
-        using var httpClient = GetCloudflareApiHttpClient();
+        using var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.GetAsync(requestUri, cancellationToken);
 
         EnsureHttpStatusSuccess(response);
@@ -35,12 +34,16 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         return await response.Content.ReadFromJsonAsync<GetDnsRecordsResponse>(cancellationToken);
     }
 
-    public async Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(string zoneIdentifier, string recordId,
-        PatchDnsRecordRequest payload, CancellationToken cancellationToken = default)
+    public async Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(
+        string apiToken,
+        string zoneIdentifier,
+        string recordId,
+        PatchDnsRecordRequest payload,
+        CancellationToken cancellationToken = default)
     {
         var requestUri = $"{zoneIdentifier}/dns_records/{recordId}";
 
-        using var httpClient = GetCloudflareApiHttpClient();
+        using var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.PatchAsJsonAsync(requestUri, payload, cancellationToken);
 
         EnsureHttpStatusSuccess(response);
@@ -55,7 +58,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
                 $"Expected Cloudflare API response to have a success status code, but got {response?.StatusCode}.");
     }
 
-    private HttpClient GetCloudflareApiHttpClient()
+    private HttpClient GetCloudflareApiHttpClient(string authToken)
     {
         // ReSharper disable once InvertIf
         if (_httpClient == null)
@@ -63,8 +66,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
             _httpClient = _httpClientFactory.CreateClient();
             _httpClient.BaseAddress = new Uri(CloudflareApiAddress);
 
-            _httpClient.DefaultRequestHeaders.Add("X-Auth-Email", _authEmail);
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
         }
 
         return _httpClient;
