@@ -9,19 +9,20 @@ namespace MyDDNS.Registrar.Cloudflare;
 public class CloudflareDnsUpdater : IDnsUpdater
 {
     private readonly ICloudflareApiAdapter _cloudflareApi;
-    private readonly CloudflareDnsConfiguration _configuration;
+    private readonly List<CloudflareDomainConfiguration> _domains;
 
-    public CloudflareDnsUpdater(ICloudflareApiAdapter cloudflareApi, CloudflareDnsConfiguration configuration)
+    public CloudflareDnsUpdater(ICloudflareApiAdapter cloudflareApi, List<CloudflareDomainConfiguration> domains)
     {
         _cloudflareApi = cloudflareApi ?? throw new ArgumentNullException(nameof(cloudflareApi));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _domains = domains ?? throw new ArgumentNullException(nameof(domains));
     }
 
     public async Task UpdateDnsAsync(IPAddress ip, CancellationToken cancellationToken = default)
     {
-        foreach (var entry in _configuration.Dns)
+        foreach (var domain in _domains)
         {
-            var response = await _cloudflareApi.GetDnsRecordsAsync(_configuration.ZoneIdentifier, entry.Name, cancellationToken);
+            var response = await _cloudflareApi.GetDnsRecordsAsync(domain.ApiToken, domain.ZoneIdentifier,
+                domain.RecordName, cancellationToken);
 
             if (response?.Result == null)
             {
@@ -31,18 +32,20 @@ public class CloudflareDnsUpdater : IDnsUpdater
 
             foreach (var record in response.Result)
             {
-                var payload = new PatchDnsRecordRequest {
+                var payload = new PatchDnsRecordRequest
+                {
                     // Entry settings from configuration
-                    Name = entry.Name,
-                    Proxied = entry.Proxied,
-                    Ttl = entry.Ttl,
+                    Name = domain.RecordName,
+                    Proxied = domain.Proxied,
+                    Ttl = domain.Ttl,
                     // IP to be changed
                     Content = ip.ToString(),
-                    // Keep the same type
+                    // Keep the same type (A)
                     Type = record.Type
                 };
-                
-                await _cloudflareApi.PatchDnsRecordAsync(_configuration.ZoneIdentifier, record.Id!, payload, cancellationToken);
+
+                await _cloudflareApi.PatchDnsRecordAsync(domain.ApiToken, domain.ZoneIdentifier, record.Id!, payload,
+                    cancellationToken);
                 // TODO: Log if failed to patch
             }
         }
