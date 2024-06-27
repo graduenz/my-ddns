@@ -25,7 +25,7 @@ public class CloudflareIpAddressFetchStrategyTests
         );
         
         // Act
-        var ip = await strategy.GetIpAddressAsync();
+        var ip = await strategy.GetIpAddressAsync(CancellationToken.None);
         
         // Assert
         ip.Should().Be(IPAddress.None);
@@ -40,7 +40,7 @@ public class CloudflareIpAddressFetchStrategyTests
         );
         
         // Act
-        var ip = await strategy.GetIpAddressAsync();
+        var ip = await strategy.GetIpAddressAsync(CancellationToken.None);
         
         // Assert
         ip.ToString().Should().Be("189.113.244.7");

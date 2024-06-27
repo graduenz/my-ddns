@@ -35,13 +35,13 @@ public class DefaultIpAddressProviderTests
         // Arrange
         var strategyMock = new Mock<IIpAddressFetchStrategy>();
         strategyMock
-            .Setup(m => m.GetIpAddressAsync())
+            .Setup(m => m.GetIpAddressAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(IPAddress.None);
 
         var provider = new DefaultIpAddressProvider(new[] { strategyMock.Object });
 
         // Act
-        var act = () => provider.GetIpAddressAsync();
+        var act = () => provider.GetIpAddressAsync(CancellationToken.None);
 
         // Assert
         (await act.Should()
@@ -55,13 +55,13 @@ public class DefaultIpAddressProviderTests
         // Arrange
         var strategyMock = new Mock<IIpAddressFetchStrategy>();
         strategyMock
-            .Setup(m => m.GetIpAddressAsync())
+            .Setup(m => m.GetIpAddressAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(IPAddress.Parse("10.10.10.10"));
         
         var provider = new DefaultIpAddressProvider(new[] { strategyMock.Object });
         
         // Act
-        var ip = await provider.GetIpAddressAsync();
+        var ip = await provider.GetIpAddressAsync(CancellationToken.None);
         
         // Assert
         ip.ToString().Should().Be("10.10.10.10");
