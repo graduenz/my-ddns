@@ -4,5 +4,5 @@ namespace MyDDNS.Core.Dns;
 
 public interface IDnsUpdater
 {
-    Task UpdateDnsAsync(IPAddress ip);
+    Task UpdateDnsAsync(IPAddress ip, CancellationToken cancellationToken = default);
 }

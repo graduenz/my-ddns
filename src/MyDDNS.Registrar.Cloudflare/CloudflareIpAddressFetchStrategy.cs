@@ -18,10 +18,10 @@ public partial class CloudflareIpAddressFetchStrategy : IIpAddressFetchStrategy
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
     
-    public async Task<IPAddress> GetIpAddressAsync()
+    public async Task<IPAddress> GetIpAddressAsync(CancellationToken cancellationToken = default)
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        var traceResponseText = await httpClient.GetStringAsync(CloudflareTraceUri);
+        var traceResponseText = await httpClient.GetStringAsync(CloudflareTraceUri, cancellationToken);
 
         var match = IpExtractRegex().Match(traceResponseText);
         var success = match.Success && match.Groups["ip"].Success;

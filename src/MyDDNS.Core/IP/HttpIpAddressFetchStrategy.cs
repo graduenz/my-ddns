@@ -16,12 +16,12 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
             throw new ArgumentException("At least one IP provider must be specified.", nameof(ipProviders));
     }
 
-    public async Task<IPAddress> GetIpAddressAsync()
+    public async Task<IPAddress> GetIpAddressAsync(CancellationToken cancellationToken = default)
     {
         var ipFetchTasks = _ipProviders.Select(async uri =>
         {
             using var httpClient = _httpClientFactory.CreateClient();
-            var ipText = await httpClient.GetStringAsync(uri);
+            var ipText = await httpClient.GetStringAsync(uri, cancellationToken);
             return ipText;
         });
 

@@ -47,7 +47,7 @@ public class HttpIpAddressFetchStrategyTests
             new HttpIpAddressFetchStrategy(HttpClientFactoryMock.Create(responseString).Object, GetTestIpProviders());
 
         // Act
-        var ip = await strategy.GetIpAddressAsync();
+        var ip = await strategy.GetIpAddressAsync(CancellationToken.None);
 
         // Asset
         ip.Should().Be(IPAddress.None);
@@ -60,7 +60,7 @@ public class HttpIpAddressFetchStrategyTests
         var strategy = new HttpIpAddressFetchStrategy(HttpClientFactoryMock.Create().Object, GetTestIpProviders());
 
         // Act
-        var ip = await strategy.GetIpAddressAsync();
+        var ip = await strategy.GetIpAddressAsync(CancellationToken.None);
 
         // Asset
         ip.Should().BeEquivalentTo(IPAddress.Parse("10.10.10.10"));

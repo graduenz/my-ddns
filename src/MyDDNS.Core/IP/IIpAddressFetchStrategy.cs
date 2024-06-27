@@ -4,5 +4,5 @@ namespace MyDDNS.Core.IP;
 
 public interface IIpAddressFetchStrategy
 {
-    Task<IPAddress> GetIpAddressAsync();
+    Task<IPAddress> GetIpAddressAsync(CancellationToken cancellationToken = default);
 }

@@ -37,15 +37,16 @@ public class CloudflareDnsUpdaterTests
         var updater = new CloudflareDnsUpdater(cloudflareApiMock.Object, GetTestCloudflareDnsConfiguration());
 
         // Act
-        await updater.UpdateDnsAsync(IPAddress.Parse("10.10.10.10"));
+        await updater.UpdateDnsAsync(IPAddress.Parse("10.10.10.10"), CancellationToken.None);
 
         // Assert
         cloudflareApiMock.Verify(
-            m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>()),
+            m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
         cloudflareApiMock.Verify(
-            m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()),
+            m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -67,9 +68,11 @@ public class CloudflareDnsUpdaterTests
         var mock = new Mock<ICloudflareApiAdapter>();
 
         mock
-            .Setup(m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(new GetDnsRecordsResponse {
-                Result = [
+            .Setup(m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetDnsRecordsResponse
+            {
+                Result =
+                [
                     new CloudflareDnsRecord
                         { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "11.11.11.11" }
                 ],
@@ -77,8 +80,10 @@ public class CloudflareDnsUpdaterTests
             });
 
         mock
-            .Setup(m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>()))
-            .ReturnsAsync(new PatchDnsRecordResponse {
+            .Setup(m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PatchDnsRecordResponse
+            {
                 Result = new CloudflareDnsRecord
                     { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "10.10.10.10" },
                 Success = true

@@ -17,11 +17,11 @@ public class CloudflareDnsUpdater : IDnsUpdater
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public async Task UpdateDnsAsync(IPAddress ip)
+    public async Task UpdateDnsAsync(IPAddress ip, CancellationToken cancellationToken = default)
     {
         foreach (var entry in _configuration.Dns)
         {
-            var response = await _cloudflareApi.GetDnsRecordsAsync(_configuration.ZoneIdentifier, entry.Name);
+            var response = await _cloudflareApi.GetDnsRecordsAsync(_configuration.ZoneIdentifier, entry.Name, cancellationToken);
 
             if (response?.Result == null)
             {
@@ -42,7 +42,7 @@ public class CloudflareDnsUpdater : IDnsUpdater
                     Type = record.Type
                 };
                 
-                await _cloudflareApi.PatchDnsRecordAsync(_configuration.ZoneIdentifier, record.Id!, payload);
+                await _cloudflareApi.PatchDnsRecordAsync(_configuration.ZoneIdentifier, record.Id!, payload, cancellationToken);
                 // TODO: Log if failed to patch
             }
         }
