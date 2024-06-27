@@ -14,16 +14,16 @@ public class CloudflareDnsUpdaterTests
     public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [
         [CreateApiAdapterMock().Object, null!],
-        [null!, GetTestCloudflareDnsConfiguration()]
+        [null!, GetTestDomainConfigs()]
     ];
 
     [Theory]
     [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
     public void Ctor_WhenNullParams_Throws(ICloudflareApiAdapter cloudflareApi,
-        CloudflareDnsConfiguration configuration)
+        List<CloudflareDomainConfiguration> domains)
     {
         // Act
-        var act = () => new CloudflareDnsUpdater(cloudflareApi, configuration);
+        var act = () => new CloudflareDnsUpdater(cloudflareApi, domains);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -34,41 +34,42 @@ public class CloudflareDnsUpdaterTests
     {
         // Arrange
         var cloudflareApiMock = CreateApiAdapterMock();
-        var updater = new CloudflareDnsUpdater(cloudflareApiMock.Object, GetTestCloudflareDnsConfiguration());
+        var updater = new CloudflareDnsUpdater(cloudflareApiMock.Object, GetTestDomainConfigs());
 
         // Act
         await updater.UpdateDnsAsync(IPAddress.Parse("10.10.10.10"), CancellationToken.None);
 
         // Assert
         cloudflareApiMock.Verify(
-            m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
 
         cloudflareApiMock.Verify(
-            m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>(),
+            m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<PatchDnsRecordRequest>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
-    private static CloudflareDnsConfiguration GetTestCloudflareDnsConfiguration() =>
-        new(
-            auth: new AuthConfiguration(
-                "test@test.com",
-                "test_token"
-            ),
-            zoneIdentifier: "a2b2c3d4e5f6",
-            dns:
-            [
-                new DnsEntry("rdnz.dev", false, 1)
-            ]
-        );
+    private static List<CloudflareDomainConfiguration> GetTestDomainConfigs() =>
+    [
+        new CloudflareDomainConfiguration(
+            "api_token",
+            "zone_identifier",
+            "rdnz.dev",
+            false,
+            1
+        )
+    ];
 
     private static Mock<ICloudflareApiAdapter> CreateApiAdapterMock()
     {
         var mock = new Mock<ICloudflareApiAdapter>();
 
         mock
-            .Setup(m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetDnsRecordsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new GetDnsRecordsResponse
             {
                 Result =
@@ -80,7 +81,8 @@ public class CloudflareDnsUpdaterTests
             });
 
         mock
-            .Setup(m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PatchDnsRecordRequest>(),
+            .Setup(m => m.PatchDnsRecordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<PatchDnsRecordRequest>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PatchDnsRecordResponse
             {

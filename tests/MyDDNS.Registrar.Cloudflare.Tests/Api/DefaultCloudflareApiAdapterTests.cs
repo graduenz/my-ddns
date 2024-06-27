@@ -10,25 +10,16 @@ namespace MyDDNS.Registrar.Cloudflare.Tests.Api;
 
 public class DefaultCloudflareApiAdapterTests
 {
-    private const string AuthEmail = "test@test.com";
-    private const string AuthToken = "test_token";
+    private const string ApiToken = "test_token";
     private const string ZoneIdentifier = "test_zone_identifier";
     private const string RecordName = "test_record_name";
     private const string RecordId = "test_record_id";
 
-    public static object[][] Ctor_WhenNullParams_Throws_Data() =>
-    [
-        [null!, AuthEmail, AuthToken],
-        [CreateHttpClientFactoryMock().Object, null!, AuthToken],
-        [CreateHttpClientFactoryMock().Object, AuthEmail, null!]
-    ];
-
-    [Theory]
-    [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
-    public void Ctor_WhenNullParams_Throws(IHttpClientFactory httpClientFactory, string authEmail, string authToken)
+    [Fact]
+    public void Ctor_WhenNullParams_Throws()
     {
         // Act
-        var act = () => new DefaultCloudflareApiAdapter(httpClientFactory, authEmail, authToken);
+        var act = () => new DefaultCloudflareApiAdapter(null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -39,10 +30,10 @@ public class DefaultCloudflareApiAdapterTests
     {
         // Arrange
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.BadRequest);
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         // Act
-        var act = () => api.GetDnsRecordsAsync(ZoneIdentifier, RecordName, CancellationToken.None);
+        var act = () => api.GetDnsRecordsAsync(ApiToken, ZoneIdentifier, RecordName, CancellationToken.None);
 
         // Assert
         (await act.Should()
@@ -56,10 +47,10 @@ public class DefaultCloudflareApiAdapterTests
     {
         // Arrange
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.OK, "[]");
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         // Act
-        var act = () => api.GetDnsRecordsAsync(ZoneIdentifier, RecordName, CancellationToken.None);
+        var act = () => api.GetDnsRecordsAsync(ApiToken, ZoneIdentifier, RecordName, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<JsonException>();
@@ -107,10 +98,10 @@ public class DefaultCloudflareApiAdapterTests
                              }
                              """;
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.OK, responseString);
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         // Act
-        var response = await api.GetDnsRecordsAsync(ZoneIdentifier, RecordName, CancellationToken.None);
+        var response = await api.GetDnsRecordsAsync(ApiToken, ZoneIdentifier, RecordName, CancellationToken.None);
 
         // Assert
         response.Should().NotBeNull();
@@ -123,13 +114,13 @@ public class DefaultCloudflareApiAdapterTests
     {
         // Arrange
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.MethodNotAllowed);
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         var payload = new PatchDnsRecordRequest
             { Content = "10.10.10.10", Name = "rdnz.dev", Type = "A", Ttl = 1, Proxied = false };
 
         // Act
-        var act = () => api.PatchDnsRecordAsync(ZoneIdentifier, RecordId, payload, CancellationToken.None);
+        var act = () => api.PatchDnsRecordAsync(ApiToken, ZoneIdentifier, RecordId, payload, CancellationToken.None);
 
         // Assert
         (await act.Should()
@@ -143,13 +134,13 @@ public class DefaultCloudflareApiAdapterTests
     {
         // Arrange
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.OK, null);
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         var payload = new PatchDnsRecordRequest
             { Content = "10.10.10.10", Name = "rdnz.dev", Type = "A", Ttl = 1, Proxied = false };
 
         // Act
-        var act = () => api.PatchDnsRecordAsync(ZoneIdentifier, RecordId, payload, CancellationToken.None);
+        var act = () => api.PatchDnsRecordAsync(ApiToken, ZoneIdentifier, RecordId, payload, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<JsonException>();
@@ -188,13 +179,13 @@ public class DefaultCloudflareApiAdapterTests
                              }
                              """;
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.OK, responseString);
-        var api = new DefaultCloudflareApiAdapter(mock.Object, AuthEmail, AuthToken);
+        var api = new DefaultCloudflareApiAdapter(mock.Object);
 
         var payload = new PatchDnsRecordRequest
             { Content = "10.10.10.10", Name = "rdnz.dev", Type = "A", Ttl = 1, Proxied = false };
 
         // Act
-        var response = await api.PatchDnsRecordAsync(ZoneIdentifier, RecordId, payload, CancellationToken.None);
+        var response = await api.PatchDnsRecordAsync(ApiToken, ZoneIdentifier, RecordId, payload, CancellationToken.None);
 
         // Assert
         response.Should().NotBeNull();
