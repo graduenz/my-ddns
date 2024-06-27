@@ -14,11 +14,11 @@ public class DefaultIpAddressProvider : IIpAddressProvider
             throw new ArgumentException("At least one IP fetch strategy must be specified.", nameof(fetchStrategies));
     }
     
-    public async Task<IPAddress> GetIpAddressAsync()
+    public async Task<IPAddress> GetIpAddressAsync(CancellationToken cancellationToken = default)
     {
         foreach (var strategy in _fetchStrategies)
         {
-            var ip = await strategy.GetIpAddressAsync();
+            var ip = await strategy.GetIpAddressAsync(cancellationToken);
 
             if (!Equals(ip, IPAddress.None))
                 return ip;
