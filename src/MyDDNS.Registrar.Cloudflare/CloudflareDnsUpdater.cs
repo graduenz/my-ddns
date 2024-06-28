@@ -72,7 +72,7 @@ public class CloudflareDnsUpdater : IDnsUpdater
                 var patchResponse = await _cloudflareApi.PatchDnsRecordAsync(domain.ApiToken, domain.ZoneIdentifier,
                     record.Id!, payload, cancellationToken);
 
-                if (patchResponse == null || patchResponse.Success is false)
+                if (patchResponse is not { Success: true })
                 {
                     _logger.LogError("Failed to replace IP {OldIp} by {NewIp} for {Domain} via Cloudflare API.",
                         record.Content, ip, record.Name);
