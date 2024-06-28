@@ -9,7 +9,7 @@ namespace MyDDNS.Core.Tests.IP;
 public class HttpIpAddressFetchStrategyTests
 {
     private static readonly ILogger<HttpIpAddressFetchStrategy>
-        Logger = TestLogger.Create<HttpIpAddressFetchStrategy>();
+        Logger = TestLoggerMock.Create<HttpIpAddressFetchStrategy>().Object;
 
     public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [

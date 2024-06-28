@@ -9,7 +9,8 @@ namespace MyDDNS.Core.Tests.IP;
 
 public class DefaultIpAddressProviderTests
 {
-    private static readonly ILogger<DefaultIpAddressProvider> Logger = TestLogger.Create<DefaultIpAddressProvider>();
+    private static readonly ILogger<DefaultIpAddressProvider> Logger =
+        TestLoggerMock.Create<DefaultIpAddressProvider>().Object;
 
     public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [
