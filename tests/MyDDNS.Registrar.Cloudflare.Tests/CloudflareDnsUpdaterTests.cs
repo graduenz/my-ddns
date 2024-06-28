@@ -73,6 +73,7 @@ public class CloudflareDnsUpdaterTests
             failedGetDnsRecordsResponse,
             nullPatchDnsRecordResponse,
             failedPatchDnsRecordResponse);
+
         var updater = new CloudflareDnsUpdater(loggerMock.Object, cloudflareApiMock.Object, GetTestDomainConfigs());
 
         // Act
@@ -80,6 +81,23 @@ public class CloudflareDnsUpdaterTests
 
         // Assert
         loggerMock.Verify(Log.With.LogLevel(logLevel), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateDnsAsync_WhenIpDoesNotChange_LogsSkippingMessage()
+    {
+        // Arrange
+        var loggerMock = TestLoggerMock.Create<CloudflareDnsUpdater>();
+        var cloudflareApiMock = CreateApiAdapterMock();
+        var updater = new CloudflareDnsUpdater(loggerMock.Object, cloudflareApiMock.Object, GetTestDomainConfigs());
+
+        // Act
+        await updater.UpdateDnsAsync(IPAddress.Parse("11.11.11.11"), CancellationToken.None);
+
+        // Assert
+        loggerMock.Verify(Log
+            .With.LogLevel(LogLevel.Information)
+            .And.LogMessage(m => m.StartsWith("Skipping update")), Times.Once);
     }
 
     [Fact]
