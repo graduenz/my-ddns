@@ -30,6 +30,19 @@ public class CloudflareDnsUpdaterTests
     }
 
     [Fact]
+    public void Ctor_WhenEmptyDomains_Throws()
+    {
+        // Act
+        var act = () =>
+            new CloudflareDnsUpdater(CreateApiAdapterMock().Object, new List<CloudflareDomainConfiguration>());
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("domains")
+            .And.Message.Should().StartWith("At least one domain must be specified.");
+    }
+
+    [Fact]
     public async Task UpdateDnsAsync_Success()
     {
         // Arrange

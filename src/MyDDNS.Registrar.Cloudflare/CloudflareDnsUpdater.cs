@@ -9,12 +9,15 @@ namespace MyDDNS.Registrar.Cloudflare;
 public class CloudflareDnsUpdater : IDnsUpdater
 {
     private readonly ICloudflareApiAdapter _cloudflareApi;
-    private readonly List<CloudflareDomainConfiguration> _domains;
+    private readonly IEnumerable<CloudflareDomainConfiguration> _domains;
 
-    public CloudflareDnsUpdater(ICloudflareApiAdapter cloudflareApi, List<CloudflareDomainConfiguration> domains)
+    public CloudflareDnsUpdater(ICloudflareApiAdapter cloudflareApi, IEnumerable<CloudflareDomainConfiguration> domains)
     {
         _cloudflareApi = cloudflareApi ?? throw new ArgumentNullException(nameof(cloudflareApi));
         _domains = domains ?? throw new ArgumentNullException(nameof(domains));
+        
+        if (!domains.Any())
+            throw new ArgumentException("At least one domain must be specified.", nameof(domains));
     }
 
     public async Task UpdateDnsAsync(IPAddress ip, CancellationToken cancellationToken = default)
