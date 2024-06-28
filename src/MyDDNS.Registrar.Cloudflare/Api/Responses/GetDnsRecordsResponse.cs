@@ -5,7 +5,7 @@ namespace MyDDNS.Registrar.Cloudflare.Api.Responses;
 /// <summary>
 /// Basic response body that comes from the GET DNS records on Cloudflare API.
 /// </summary>
-public record GetDnsRecordsResponse
+public class GetDnsRecordsResponse
 {
     /// <summary>
     /// List of DNS records.

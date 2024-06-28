@@ -3,7 +3,7 @@
 /// <summary>
 /// Basic request body that goes on the PATCH DNS record on Cloudflare API.
 /// </summary>
-public record PatchDnsRecordRequest
+public class PatchDnsRecordRequest
 {
     /// <summary>
     /// Record name.

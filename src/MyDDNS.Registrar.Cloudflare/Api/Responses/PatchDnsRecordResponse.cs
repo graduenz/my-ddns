@@ -5,7 +5,7 @@ namespace MyDDNS.Registrar.Cloudflare.Api.Responses;
 /// <summary>
 /// Basic response body that comes from the PATCH DNS record on Cloudflare API.
 /// </summary>
-public record PatchDnsRecordResponse
+public class PatchDnsRecordResponse
 {
     /// <summary>
     /// The updated DNS record.

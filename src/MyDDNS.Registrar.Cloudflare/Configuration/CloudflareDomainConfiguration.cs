@@ -3,7 +3,7 @@
 /// <summary>
 /// A record that contains the DNS updating configuration for a domain on Cloudflare.
 /// </summary>
-public record CloudflareDomainConfiguration
+public class CloudflareDomainConfiguration
 {
     /// <summary>
     /// Creates the <see cref="CloudflareDomainConfiguration"/>.

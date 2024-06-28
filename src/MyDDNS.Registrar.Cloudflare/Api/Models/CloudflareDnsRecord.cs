@@ -3,7 +3,7 @@
 /// <summary>
 /// Basic model of the DNS record on Cloudflare API.
 /// </summary>
-public record CloudflareDnsRecord
+public class CloudflareDnsRecord
 {
     /// <summary>
     /// Record ID.
