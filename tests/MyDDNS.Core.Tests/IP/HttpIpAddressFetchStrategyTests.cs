@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using MyDDNS.Core.IP;
 using MyDDNS.TestUtils;
 
@@ -7,18 +8,23 @@ namespace MyDDNS.Core.Tests.IP;
 
 public class HttpIpAddressFetchStrategyTests
 {
+    private static readonly ILogger<HttpIpAddressFetchStrategy>
+        Logger = TestLoggerMock.Create<HttpIpAddressFetchStrategy>().Object;
+
     public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [
-        [HttpClientFactoryMock.Create().Object, null!],
-        [null!, GetTestIpProviders()]
+        [Logger, HttpClientFactoryMock.Create().Object, null!],
+        [Logger, null!, GetTestIpProviders()],
+        [null!, HttpClientFactoryMock.Create().Object, GetTestIpProviders()]
     ];
 
     [Theory]
     [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
-    public void Ctor_WhenNullParams_Throws(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
+    public void Ctor_WhenNullParams_Throws(ILogger<HttpIpAddressFetchStrategy> logger,
+        IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
     {
         // Act
-        var act = () => new HttpIpAddressFetchStrategy(httpClientFactory, ipProviders);
+        var act = () => new HttpIpAddressFetchStrategy(logger, httpClientFactory, ipProviders);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -28,7 +34,7 @@ public class HttpIpAddressFetchStrategyTests
     public void Ctor_WhenEmptyIpProviders_Throws()
     {
         // Act
-        var act = () => new HttpIpAddressFetchStrategy(HttpClientFactoryMock.Create().Object, new List<Uri>());
+        var act = () => new HttpIpAddressFetchStrategy(Logger, HttpClientFactoryMock.Create().Object, new List<Uri>());
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -44,7 +50,8 @@ public class HttpIpAddressFetchStrategyTests
     {
         // Arrange
         var strategy =
-            new HttpIpAddressFetchStrategy(HttpClientFactoryMock.Create(responseString).Object, GetTestIpProviders());
+            new HttpIpAddressFetchStrategy(Logger, HttpClientFactoryMock.Create(responseString).Object,
+                GetTestIpProviders());
 
         // Act
         var ip = await strategy.GetIpAddressAsync(CancellationToken.None);
@@ -57,7 +64,8 @@ public class HttpIpAddressFetchStrategyTests
     public async Task GetIpAddressAsync_Success()
     {
         // Arrange
-        var strategy = new HttpIpAddressFetchStrategy(HttpClientFactoryMock.Create().Object, GetTestIpProviders());
+        var strategy =
+            new HttpIpAddressFetchStrategy(Logger, HttpClientFactoryMock.Create().Object, GetTestIpProviders());
 
         // Act
         var ip = await strategy.GetIpAddressAsync(CancellationToken.None);

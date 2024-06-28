@@ -1,13 +1,18 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace MyDDNS.Core.IP;
 
 public class DefaultIpAddressProvider : IIpAddressProvider
 {
+    private readonly ILogger<DefaultIpAddressProvider> _logger;
     private readonly IEnumerable<IIpAddressFetchStrategy> _fetchStrategies;
 
-    public DefaultIpAddressProvider(IEnumerable<IIpAddressFetchStrategy> fetchStrategies)
+    public DefaultIpAddressProvider(
+        ILogger<DefaultIpAddressProvider> logger,
+        IEnumerable<IIpAddressFetchStrategy> fetchStrategies)
     {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fetchStrategies = fetchStrategies ?? throw new ArgumentNullException(nameof(fetchStrategies));
         
         if (!fetchStrategies.Any())
@@ -20,8 +25,14 @@ public class DefaultIpAddressProvider : IIpAddressProvider
         {
             var ip = await strategy.GetIpAddressAsync(cancellationToken);
 
-            if (!Equals(ip, IPAddress.None))
-                return ip;
+            var strategyName = strategy.GetType().Name;
+            _logger.LogTrace("Got IP {Ip} using {Strategy}.", ip, strategyName);
+
+            if (Equals(ip, IPAddress.None))
+                continue;
+            
+            _logger.LogInformation("Using IP {Ip} got from {Strategy}.", ip, strategyName);
+            return ip;
         }
 
         throw new InvalidOperationException("Failed to fetch the IP address: None of the strategies succeeded.");

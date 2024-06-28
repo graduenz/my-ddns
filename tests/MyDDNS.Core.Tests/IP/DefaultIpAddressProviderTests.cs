@@ -1,17 +1,30 @@
 ﻿using System.Net;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using MyDDNS.Core.IP;
+using MyDDNS.TestUtils;
 
 namespace MyDDNS.Core.Tests.IP;
 
 public class DefaultIpAddressProviderTests
 {
-    [Fact]
-    public void Ctor_WhenNullParams_Throws()
+    private static readonly ILogger<DefaultIpAddressProvider> Logger =
+        TestLoggerMock.Create<DefaultIpAddressProvider>().Object;
+
+    public static object[][] Ctor_WhenNullParams_Throws_Data() =>
+    [
+        [Logger, null!],
+        [null!, new List<IIpAddressFetchStrategy> { new Mock<IIpAddressFetchStrategy>().Object }]
+    ];
+
+    [Theory]
+    [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
+    public void Ctor_WhenNullParams_Throws(ILogger<DefaultIpAddressProvider> logger,
+        IEnumerable<IIpAddressFetchStrategy> fetchStrategies)
     {
         // Act
-        var act = () => new DefaultIpAddressProvider(null!);
+        var act = () => new DefaultIpAddressProvider(logger, fetchStrategies);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -21,7 +34,7 @@ public class DefaultIpAddressProviderTests
     public void Ctor_WhenEmptyFetchStrategies_Throws()
     {
         // Act
-        var act = () => new DefaultIpAddressProvider(new List<IIpAddressFetchStrategy>());
+        var act = () => new DefaultIpAddressProvider(Logger, new List<IIpAddressFetchStrategy>());
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -38,14 +51,14 @@ public class DefaultIpAddressProviderTests
             .Setup(m => m.GetIpAddressAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(IPAddress.None);
 
-        var provider = new DefaultIpAddressProvider(new[] { strategyMock.Object });
+        var provider = new DefaultIpAddressProvider(Logger, new[] { strategyMock.Object });
 
         // Act
         var act = () => provider.GetIpAddressAsync(CancellationToken.None);
 
         // Assert
         (await act.Should()
-            .ThrowAsync<InvalidOperationException>())
+                .ThrowAsync<InvalidOperationException>())
             .And.Message.Should().Be("Failed to fetch the IP address: None of the strategies succeeded.");
     }
 
@@ -57,12 +70,12 @@ public class DefaultIpAddressProviderTests
         strategyMock
             .Setup(m => m.GetIpAddressAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(IPAddress.Parse("10.10.10.10"));
-        
-        var provider = new DefaultIpAddressProvider(new[] { strategyMock.Object });
-        
+
+        var provider = new DefaultIpAddressProvider(Logger, new[] { strategyMock.Object });
+
         // Act
         var ip = await provider.GetIpAddressAsync(CancellationToken.None);
-        
+
         // Assert
         ip.ToString().Should().Be("10.10.10.10");
     }

@@ -1,14 +1,20 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace MyDDNS.Core.IP;
 
 public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
 {
+    private readonly ILogger<HttpIpAddressFetchStrategy> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IEnumerable<Uri> _ipProviders;
 
-    public HttpIpAddressFetchStrategy(IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
+    public HttpIpAddressFetchStrategy(
+        ILogger<HttpIpAddressFetchStrategy> logger,
+        IHttpClientFactory httpClientFactory,
+        IEnumerable<Uri> ipProviders)
     {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _ipProviders = ipProviders ?? throw new ArgumentNullException(nameof(ipProviders));
 
@@ -21,13 +27,15 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
         var ipFetchTasks = _ipProviders.Select(async uri =>
         {
             using var httpClient = _httpClientFactory.CreateClient();
-            var ipText = await httpClient.GetStringAsync(uri, cancellationToken);
-            return ipText;
+            var ipString = await httpClient.GetStringAsync(uri, cancellationToken);
+            return (ipString, uri);
         });
 
         var firstCompletedIpFetchTask = await Task.WhenAny(ipFetchTasks);
-        var ipString = await firstCompletedIpFetchTask;
+        var (actualIpString, actualUri) = await firstCompletedIpFetchTask;
+        
+        _logger.LogTrace("Got IP {Ip} from {Uri}.", actualIpString, actualUri);
 
-        return IPAddress.TryParse(ipString, out var ip) ? ip : IPAddress.None;
+        return IPAddress.TryParse(actualIpString, out var ip) ? ip : IPAddress.None;
     }
 }
