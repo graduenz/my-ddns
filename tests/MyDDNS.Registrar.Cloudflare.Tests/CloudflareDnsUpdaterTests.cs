@@ -1,29 +1,34 @@
 ﻿using System.Net;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using MyDDNS.Registrar.Cloudflare.Api;
 using MyDDNS.Registrar.Cloudflare.Api.Models;
 using MyDDNS.Registrar.Cloudflare.Api.Requests;
 using MyDDNS.Registrar.Cloudflare.Api.Responses;
 using MyDDNS.Registrar.Cloudflare.Configuration;
+using MyDDNS.TestUtils;
 
 namespace MyDDNS.Registrar.Cloudflare.Tests;
 
 public class CloudflareDnsUpdaterTests
 {
+    private static readonly ILogger<CloudflareDnsUpdater> Logger = TestLogger.Create<CloudflareDnsUpdater>();
+
     public static object[][] Ctor_WhenNullParams_Throws_Data() =>
     [
-        [CreateApiAdapterMock().Object, null!],
-        [null!, GetTestDomainConfigs()]
+        [Logger, CreateApiAdapterMock().Object, null!],
+        [Logger, null!, GetTestDomainConfigs()],
+        [null!, CreateApiAdapterMock().Object, GetTestDomainConfigs()]
     ];
 
     [Theory]
     [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
-    public void Ctor_WhenNullParams_Throws(ICloudflareApiAdapter cloudflareApi,
+    public void Ctor_WhenNullParams_Throws(ILogger<CloudflareDnsUpdater> logger, ICloudflareApiAdapter cloudflareApi,
         List<CloudflareDomainConfiguration> domains)
     {
         // Act
-        var act = () => new CloudflareDnsUpdater(cloudflareApi, domains);
+        var act = () => new CloudflareDnsUpdater(logger, cloudflareApi, domains);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -34,7 +39,7 @@ public class CloudflareDnsUpdaterTests
     {
         // Act
         var act = () =>
-            new CloudflareDnsUpdater(CreateApiAdapterMock().Object, new List<CloudflareDomainConfiguration>());
+            new CloudflareDnsUpdater(Logger, CreateApiAdapterMock().Object, new List<CloudflareDomainConfiguration>());
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -47,7 +52,7 @@ public class CloudflareDnsUpdaterTests
     {
         // Arrange
         var cloudflareApiMock = CreateApiAdapterMock();
-        var updater = new CloudflareDnsUpdater(cloudflareApiMock.Object, GetTestDomainConfigs());
+        var updater = new CloudflareDnsUpdater(Logger, cloudflareApiMock.Object, GetTestDomainConfigs());
 
         // Act
         await updater.UpdateDnsAsync(IPAddress.Parse("10.10.10.10"), CancellationToken.None);
