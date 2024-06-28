@@ -36,10 +36,7 @@ public class DefaultCloudflareApiAdapterTests
         var act = () => api.GetDnsRecordsAsync(ApiToken, ZoneIdentifier, RecordName, CancellationToken.None);
 
         // Assert
-        (await act.Should()
-                .ThrowAsync<InvalidOperationException>())
-            .And.Message.Should()
-            .Be("Expected Cloudflare API response to have a success status code, but got BadRequest.");
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
     [Fact]
@@ -123,10 +120,7 @@ public class DefaultCloudflareApiAdapterTests
         var act = () => api.PatchDnsRecordAsync(ApiToken, ZoneIdentifier, RecordId, payload, CancellationToken.None);
 
         // Assert
-        (await act.Should()
-                .ThrowAsync<InvalidOperationException>())
-            .And.Message.Should()
-            .Be("Expected Cloudflare API response to have a success status code, but got MethodNotAllowed.");
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
     [Fact]
