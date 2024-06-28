@@ -49,12 +49,14 @@ public class CloudflareDnsUpdaterTests
     }
 
     [Theory]
-    [InlineData(true, false, false, false, false, LogLevel.Warning)]
-    [InlineData(false, true, false, false, false, LogLevel.Warning)]
-    [InlineData(false, false, false, true, false, LogLevel.Error)]
-    [InlineData(false, false, false, false, true, LogLevel.Error)]
+    [InlineData(true, false, false, false, false, false, LogLevel.Warning)]
+    [InlineData(false, true, false, false, false, false, LogLevel.Warning)]
+    [InlineData(false, false, true, false, false, false, LogLevel.Warning)]
+    [InlineData(false, false, false, false, true, false, LogLevel.Error)]
+    [InlineData(false, false, false, false, false, true, LogLevel.Error)]
     public async Task UpdateDnsAsync_Logs_As_Expected(
         bool nullGetDnsRecordsResponse,
+        bool nullGetDnsRecordsList,
         bool emptyGetDnsRecordsList,
         bool failedGetDnsRecordsResponse,
         bool nullPatchDnsRecordResponse,
@@ -64,8 +66,13 @@ public class CloudflareDnsUpdaterTests
         // Arrange
         var loggerMock = TestLoggerMock.Create<CloudflareDnsUpdater>();
 
-        var cloudflareApiMock = CreateApiAdapterMock(nullGetDnsRecordsResponse, emptyGetDnsRecordsList,
-            failedGetDnsRecordsResponse, nullPatchDnsRecordResponse, failedPatchDnsRecordResponse);
+        var cloudflareApiMock = CreateApiAdapterMock(
+            nullGetDnsRecordsResponse,
+            nullGetDnsRecordsList,
+            emptyGetDnsRecordsList,
+            failedGetDnsRecordsResponse,
+            nullPatchDnsRecordResponse,
+            failedPatchDnsRecordResponse);
         var updater = new CloudflareDnsUpdater(loggerMock.Object, cloudflareApiMock.Object, GetTestDomainConfigs());
 
         // Act
@@ -111,6 +118,7 @@ public class CloudflareDnsUpdaterTests
 
     private static Mock<ICloudflareApiAdapter> CreateApiAdapterMock(
         bool nullGetDnsRecordsResponse = false,
+        bool nullGetDnsRecordsList = false,
         bool emptyGetDnsRecordsList = false,
         bool failedGetDnsRecordsResponse = false,
         bool nullPatchDnsRecordResponse = false,
@@ -126,13 +134,15 @@ public class CloudflareDnsUpdaterTests
                 ? null
                 : new GetDnsRecordsResponse
                 {
-                    Result = emptyGetDnsRecordsList
-                        ? []
-                        :
-                        [
-                            new CloudflareDnsRecord
-                                { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "11.11.11.11" }
-                        ],
+                    Result = nullGetDnsRecordsList
+                        ? null
+                        : emptyGetDnsRecordsList
+                            ? []
+                            :
+                            [
+                                new CloudflareDnsRecord
+                                    { Id = "aaaabbbb11112222", Name = "rdnz.dev", Type = "A", Content = "11.11.11.11" }
+                            ],
                     Success = !failedGetDnsRecordsResponse
                 });
 
