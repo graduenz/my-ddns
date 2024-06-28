@@ -5,6 +5,9 @@ using MyDDNS.Registrar.Cloudflare.Api.Responses;
 
 namespace MyDDNS.Registrar.Cloudflare.Api;
 
+/// <summary>
+/// Default implementation of <see cref="ICloudflareApiAdapter"/>.
+/// </summary>
 public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
 {
     private const string CloudflareApiAddress = "https://api.cloudflare.com/client/v4/";
@@ -13,11 +16,17 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
 
     private HttpClient? _httpClient;
 
+    /// <summary>
+    /// Creates the <see cref="DefaultCloudflareApiAdapter"/>.
+    /// </summary>
+    /// <param name="httpClientFactory">An instance of <see cref="IHttpClientFactory"/>.</param>
+    /// <exception cref="ArgumentNullException">When any of the parameters are null.</exception>
     public DefaultCloudflareApiAdapter(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
 
+    /// <inheritdoc />
     public async Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(
         string apiToken,
         string zoneIdentifier,
@@ -34,6 +43,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         return await response.Content.ReadFromJsonAsync<GetDnsRecordsResponse>(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(
         string apiToken,
         string zoneIdentifier,
