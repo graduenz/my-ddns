@@ -37,8 +37,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
 
         using var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.GetAsync(requestUri, cancellationToken);
-
-        EnsureHttpStatusSuccess(response);
+        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<GetDnsRecordsResponse>(cancellationToken);
     }
@@ -55,17 +54,9 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
 
         using var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.PatchAsJsonAsync(requestUri, payload, cancellationToken);
-
-        EnsureHttpStatusSuccess(response);
+        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<PatchDnsRecordResponse>(cancellationToken);
-    }
-
-    private static void EnsureHttpStatusSuccess(HttpResponseMessage response)
-    {
-        if (response is not { IsSuccessStatusCode: true })
-            throw new InvalidOperationException(
-                $"Expected Cloudflare API response to have a success status code, but got {response.StatusCode}.");
     }
 
     private HttpClient GetCloudflareApiHttpClient(string authToken)
