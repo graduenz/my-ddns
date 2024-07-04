@@ -21,10 +21,10 @@ public class HttpIpAddressFetchStrategyTests
     [Theory]
     [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
     public void Ctor_WhenNullParams_Throws(ILogger<HttpIpAddressFetchStrategy> logger,
-        IHttpClientFactory httpClientFactory, IEnumerable<Uri> ipProviders)
+        IHttpClientFactory httpClientFactory, HttpIpAddressProviderList ipAddressProviders)
     {
         // Act
-        var act = () => new HttpIpAddressFetchStrategy(logger, httpClientFactory, ipProviders);
+        var act = () => new HttpIpAddressFetchStrategy(logger, httpClientFactory, ipAddressProviders);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -34,7 +34,7 @@ public class HttpIpAddressFetchStrategyTests
     public void Ctor_WhenEmptyIpProviders_Throws()
     {
         // Act
-        var act = () => new HttpIpAddressFetchStrategy(Logger, HttpClientFactoryMock.Create().Object, new List<Uri>());
+        var act = () => new HttpIpAddressFetchStrategy(Logger, HttpClientFactoryMock.Create().Object, new HttpIpAddressProviderList(new List<Uri>()));
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -74,9 +74,9 @@ public class HttpIpAddressFetchStrategyTests
         ip.Should().BeEquivalentTo(IPAddress.Parse("10.10.10.10"));
     }
 
-    private static List<Uri> GetTestIpProviders() =>
+    private static HttpIpAddressProviderList GetTestIpProviders() => new(
     [
         new Uri("https://provider1.com"),
         new Uri("https://provider2.com")
-    ];
+    ]);
 }

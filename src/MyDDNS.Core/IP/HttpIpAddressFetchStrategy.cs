@@ -10,33 +10,33 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
 {
     private readonly ILogger<HttpIpAddressFetchStrategy> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IEnumerable<Uri> _ipProviders;
+    private readonly HttpIpAddressProviderList _ipAddressProviders;
 
     /// <summary>
     /// Creates the <see cref="HttpIpAddressFetchStrategy"/>.
     /// </summary>
     /// <param name="logger">An instance of <see cref="ILogger"/>.</param>
     /// <param name="httpClientFactory">An instance of <see cref="IHttpClientFactory"/>.</param>
-    /// <param name="ipProviders">URIs of the IP address providers.</param>
+    /// <param name="ipAddressProviders">List of IP address providers' URIs.</param>
     /// <exception cref="ArgumentNullException">When any of the parameters are null.</exception>
-    /// <exception cref="ArgumentException">When <paramref name="ipProviders"/> parameter is empty.</exception>
+    /// <exception cref="ArgumentException">When <paramref name="ipAddressProviders"/> parameter is empty.</exception>
     public HttpIpAddressFetchStrategy(
         ILogger<HttpIpAddressFetchStrategy> logger,
         IHttpClientFactory httpClientFactory,
-        IEnumerable<Uri> ipProviders)
+        HttpIpAddressProviderList ipAddressProviders)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _ipProviders = ipProviders ?? throw new ArgumentNullException(nameof(ipProviders));
+        _ipAddressProviders = ipAddressProviders ?? throw new ArgumentNullException(nameof(ipAddressProviders));
 
-        if (!ipProviders.Any())
-            throw new ArgumentException("At least one IP provider must be specified.", nameof(ipProviders));
+        if (!ipAddressProviders.Any())
+            throw new ArgumentException("At least one IP provider must be specified.", nameof(ipAddressProviders));
     }
     
     /// <inheritdoc />
     public async Task<IPAddress> GetIpAddressAsync(CancellationToken cancellationToken = default)
     {
-        var ipFetchTasks = _ipProviders.Select(async uri =>
+        var ipFetchTasks = _ipAddressProviders.Select(async uri =>
         {
             using var httpClient = _httpClientFactory.CreateClient();
             var ipString = await httpClient.GetStringAsync(uri, cancellationToken);
@@ -46,7 +46,7 @@ public class HttpIpAddressFetchStrategy : IIpAddressFetchStrategy
         var firstCompletedIpFetchTask = await Task.WhenAny(ipFetchTasks);
         var (actualIpString, actualUri) = await firstCompletedIpFetchTask;
 
-        _logger.LogTrace("Got IP {Ip} from {Uri}.", actualIpString, actualUri);
+        _logger.LogDebug("Got IP {Ip} from {Uri}.", actualIpString, actualUri);
 
         return IPAddress.TryParse(actualIpString, out var ip) ? ip : IPAddress.None;
     }

@@ -37,7 +37,7 @@ public class DefaultIpAddressProvider : IIpAddressProvider
             var ip = await strategy.GetIpAddressAsync(cancellationToken);
 
             var strategyName = strategy.GetType().Name;
-            _logger.LogTrace("Got IP {Ip} using {Strategy}.", ip, strategyName);
+            _logger.LogDebug("Got IP {Ip} using {Strategy}.", ip, strategyName);
 
             if (Equals(ip, IPAddress.None))
                 continue;
