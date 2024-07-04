@@ -1,3 +1,14 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using MyDDNS.CLI;
 
-Console.WriteLine("Hello, World!");
+var serviceProvider = DependencyInjection.ConfigureAppDependencies();
+var app = new MyDDNSApp(serviceProvider);
+var cts = new CancellationTokenSource();
+
+Console.CancelKeyPress += (sender, eventArgs) =>
+{
+    Console.WriteLine("Cancel event triggered");
+    cts.Cancel();
+    eventArgs.Cancel = true;
+};
+
+await app.RunAsync(cts.Token);

@@ -7,4 +7,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.6.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MyDDNS.Core\MyDDNS.Core.csproj" />
+      <ProjectReference Include="..\MyDDNS.Registrar.Cloudflare\MyDDNS.Registrar.Cloudflare.csproj" />
+    </ItemGroup>
+
 </Project>
