@@ -38,7 +38,7 @@ public class HttpIpAddressFetchStrategyTests
 
         // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("ipProviders")
+            .WithParameterName("ipAddressProviders")
             .And.Message.Should().StartWith("At least one IP provider must be specified.");
     }
 
