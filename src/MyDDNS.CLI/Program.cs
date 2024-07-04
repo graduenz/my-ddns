@@ -1,14 +1,37 @@
-﻿using MyDDNS.CLI;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MyDDNS.CLI;
+using MyDDNS.Core.IP;
 
+using var cancellationTokenSource = new CancellationTokenSource();
+
+SetupCancellationEvent();
+
+Console.WriteLine("Setting up the application dependencies.");
 var serviceProvider = DependencyInjection.ConfigureAppDependencies();
-var app = new MyDDNSApp(serviceProvider);
-var cts = new CancellationTokenSource();
 
-Console.CancelKeyPress += (sender, eventArgs) =>
+var app = new ApplicationProcess(
+    ipAddressProvider: serviceProvider.GetRequiredService<IIpAddressProvider>()
+);
+
+try
 {
-    Console.WriteLine("Cancel event triggered");
-    cts.Cancel();
-    eventArgs.Cancel = true;
-};
+    Console.WriteLine("Starting MyDDNS application.");
+    await app.RunAsync(cancellationTokenSource.Token);
+}
+catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
+{
+    Console.WriteLine("Shutting down, please wait.");
+}
 
-await app.RunAsync(cts.Token);
+return;
+
+void SetupCancellationEvent()
+{
+    Console.CancelKeyPress += (sender, eventArgs) =>
+    {
+        Console.WriteLine("Cancel event triggered.");
+        // ReSharper disable once AccessToDisposedClosure
+        cancellationTokenSource.Cancel();
+        eventArgs.Cancel = true;
+    };
+}

@@ -11,23 +11,22 @@ public static class DependencyInjection
     {
         var services = new ServiceCollection();
         services
-            .AddMyDDNS()
-            .AddLogging(b => SetupLogging(b))
+            .AddLibraries()
+            .AddLogging(ConfigureLogging)
             .AddHttpClient();
 
         return services.BuildServiceProvider();
     }
 
     // TODO: Load from appsettings
-    private static ILoggingBuilder SetupLogging(ILoggingBuilder builder)
+    private static void ConfigureLogging(ILoggingBuilder builder)
     {
-        return builder
+        builder
             .AddConsole()
             .SetMinimumLevel(LogLevel.Debug);
     }
 
-    // ReSharper disable once InconsistentNaming
-    private static IServiceCollection AddMyDDNS(this IServiceCollection services)
+    private static IServiceCollection AddLibraries(this IServiceCollection services)
     {
         // TODO: Load the URIs from JSON settings
         var ipProviderUris = new[] { "https://api.ipify.org", "https://ipv4.icanhazip.com" }

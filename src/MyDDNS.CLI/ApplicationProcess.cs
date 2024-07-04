@@ -1,19 +1,17 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MyDDNS.Core.IP;
+﻿using MyDDNS.Core.IP;
 
 namespace MyDDNS.CLI;
 
-// ReSharper disable once InconsistentNaming
-public class MyDDNSApp
+public class ApplicationProcess
 {
-    private readonly ServiceProvider _serviceProvider;
+    private readonly IIpAddressProvider _ipAddressProvider;
 
     // TODO: Change settings below to read from JSON
     private readonly TimeSpan _cycleInterval = TimeSpan.FromSeconds(15);
 
-    public MyDDNSApp(ServiceProvider serviceProvider)
+    public ApplicationProcess(IIpAddressProvider ipAddressProvider)
     {
-        _serviceProvider = serviceProvider;
+        _ipAddressProvider = ipAddressProvider ?? throw new ArgumentNullException(nameof(ipAddressProvider));
     }
     
     public async Task RunAsync(CancellationToken cancellationToken)
@@ -27,8 +25,7 @@ public class MyDDNSApp
 
     private async Task RunCycleAsync(CancellationToken cancellationToken)
     {
-        var ipAddressProvider = _serviceProvider.GetRequiredService<IIpAddressProvider>();
-        var ip = await ipAddressProvider.GetIpAddressAsync(cancellationToken);
+        var ip = await _ipAddressProvider.GetIpAddressAsync(cancellationToken);
         Console.WriteLine("Got IP {0}", ip);
     }
 }
