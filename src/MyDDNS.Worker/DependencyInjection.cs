@@ -1,30 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MyDDNS.Core.IP;
+﻿using MyDDNS.Core.IP;
 using MyDDNS.Registrar.Cloudflare;
 
-namespace MyDDNS.CLI;
+namespace MyDDNS.Worker;
 
 public static class DependencyInjection
 {
-    public static ServiceProvider ConfigureAppDependencies()
-    {
-        var services = new ServiceCollection();
-        services
-            .AddLibraries()
-            .AddLogging(ConfigureLogging)
-            .AddHttpClient();
-
-        return services.BuildServiceProvider();
-    }
-
-    // TODO: Load from appsettings
-    private static void ConfigureLogging(ILoggingBuilder builder)
-    {
-        builder
-            .AddConsole()
-            .SetMinimumLevel(LogLevel.Debug);
-    }
+    public static void AddApplicationDependencies(this IServiceCollection services) => services
+        .AddLibraries()
+        .AddHttpClient();
 
     private static IServiceCollection AddLibraries(this IServiceCollection services)
     {
