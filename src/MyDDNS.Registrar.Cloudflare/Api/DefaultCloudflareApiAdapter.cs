@@ -66,7 +66,7 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
             _httpClient.BaseAddress = new Uri(CloudflareApiAddress);
         }
 
-        authToken = authToken.Trim(['\r', '\n']);
+        authToken = authToken.Trim('\r', '\n');
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
         return _httpClient;

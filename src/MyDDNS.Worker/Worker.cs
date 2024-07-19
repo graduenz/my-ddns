@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MyDDNS.Core.Dns;
 using MyDDNS.Core.IP;
 using MyDDNS.Worker.Configuration;
@@ -22,14 +23,20 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var sw = new Stopwatch();
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            sw.Restart();
             var ip = await _ipAddressProvider.GetIpAddressAsync(stoppingToken);
 
             foreach (var updater in _dnsUpdaters)
             {
                 await updater.UpdateDnsAsync(ip, stoppingToken);
             }
+
+            _logger.LogInformation("Cycle completed. Took {Elapsed}, waiting {Interval} for next cycle.",
+                sw.Elapsed, _processConfig.CycleInterval);
             
             await Task.Delay(_processConfig.CycleInterval, stoppingToken);
         }

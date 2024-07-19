@@ -123,13 +123,17 @@ public class CloudflareDnsUpdater : IDnsUpdater
         if (response is { Success: true })
             return false;
 
-        var logMessage = response == null
-            ? "Response was NULL"
-            : response.Errors == null
-                ? "Response.Errors was NULL"
-                : string.Join(", ", response.Errors.Select(err => $"{err.Code} - {err.Message}"));
-
-        _logger.LogError("Found one or more errors in Cloudflare API response: {Message}", logMessage);
+        _logger.LogError("Found one or more errors in Cloudflare API response: {Message}.", BuildErrorsMessage());
         return true;
+
+        string BuildErrorsMessage()
+        {
+            if (response is { Errors: not null })
+                return string.Join(", ", response.Errors.Select(err => $"{err.Code} - {err.Message}"));
+
+            return response == null
+                ? "Response was NULL"
+                : "Response.Errors was NULL";
+        }
     }
 }

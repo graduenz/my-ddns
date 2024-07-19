@@ -10,4 +10,4 @@ builder.Services.AddHostedService<Worker>();
 builder.Services.AddHttpClient();
 
 var host = builder.Build();
-host.Run();
+await host.RunAsync();
