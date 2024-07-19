@@ -16,7 +16,6 @@ public interface ICloudflareApiAdapter
     /// <param name="recordName">The record name.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The parsed response body from the Cloudflare API.</returns>
-    /// <exception cref="HttpRequestException">When the response does not come with a success status code.</exception>
     Task<GetDnsRecordsResponse?> GetDnsRecordsAsync(string apiToken, string zoneIdentifier, string recordName,
         CancellationToken cancellationToken = default);
 
@@ -29,7 +28,6 @@ public interface ICloudflareApiAdapter
     /// <param name="payload">The request payload.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The parsed response body from the Cloudflare API.</returns>
-    /// <exception cref="HttpRequestException">When the response does not come with a success status code.</exception>
     Task<PatchDnsRecordResponse?> PatchDnsRecordAsync(string apiToken, string zoneIdentifier, string recordId,
         PatchDnsRecordRequest payload, CancellationToken cancellationToken = default);
 }

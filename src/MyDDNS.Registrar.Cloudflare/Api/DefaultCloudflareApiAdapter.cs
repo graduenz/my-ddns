@@ -33,11 +33,10 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         string recordName,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"{zoneIdentifier}/dns_records?type=A&name={recordName}";
+        var requestUri = $"zones/{zoneIdentifier}/dns_records?type=A&name={recordName}";
 
-        using var httpClient = GetCloudflareApiHttpClient(apiToken);
+        var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.GetAsync(requestUri, cancellationToken);
-        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<GetDnsRecordsResponse>(cancellationToken);
     }
@@ -50,11 +49,10 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         PatchDnsRecordRequest payload,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"{zoneIdentifier}/dns_records/{recordId}";
+        var requestUri = $"zones/{zoneIdentifier}/dns_records/{recordId}";
 
-        using var httpClient = GetCloudflareApiHttpClient(apiToken);
+        var httpClient = GetCloudflareApiHttpClient(apiToken);
         var response = await httpClient.PatchAsJsonAsync(requestUri, payload, cancellationToken);
-        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<PatchDnsRecordResponse>(cancellationToken);
     }
@@ -66,9 +64,10 @@ public class DefaultCloudflareApiAdapter : ICloudflareApiAdapter
         {
             _httpClient = _httpClientFactory.CreateClient();
             _httpClient.BaseAddress = new Uri(CloudflareApiAddress);
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
         }
+
+        authToken = authToken.Trim(['\r', '\n']);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
         return _httpClient;
     }

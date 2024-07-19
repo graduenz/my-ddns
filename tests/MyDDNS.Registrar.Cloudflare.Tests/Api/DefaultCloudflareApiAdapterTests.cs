@@ -26,20 +26,6 @@ public class DefaultCloudflareApiAdapterTests
     }
 
     [Fact]
-    public async Task GetDnsRecordsAsync_WhenStatusCodeIsNotSuccess_Throws()
-    {
-        // Arrange
-        var mock = CreateHttpClientFactoryMock(HttpStatusCode.BadRequest);
-        var api = new DefaultCloudflareApiAdapter(mock.Object);
-
-        // Act
-        var act = () => api.GetDnsRecordsAsync(ApiToken, ZoneIdentifier, RecordName, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<HttpRequestException>();
-    }
-
-    [Fact]
     public async Task GetDnsRecordsAsync_WhenResponseIsInvalid_Throws()
     {
         // Arrange
@@ -107,24 +93,7 @@ public class DefaultCloudflareApiAdapterTests
     }
 
     [Fact]
-    public async Task PatchDnsRecordAsync_WhenStatusCodeIsNotSuccess_Throws()
-    {
-        // Arrange
-        var mock = CreateHttpClientFactoryMock(HttpStatusCode.MethodNotAllowed);
-        var api = new DefaultCloudflareApiAdapter(mock.Object);
-
-        var payload = new PatchDnsRecordRequest
-            { Content = "10.10.10.10", Name = "rdnz.dev", Type = "A", Ttl = 1, Proxied = false };
-
-        // Act
-        var act = () => api.PatchDnsRecordAsync(ApiToken, ZoneIdentifier, RecordId, payload, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<HttpRequestException>();
-    }
-
-    [Fact]
-    public async Task PatchDnsRecordAsync_WhenResponseIsInvalid1_Throws()
+    public async Task PatchDnsRecordAsync_WhenResponseIsInvalid_Throws()
     {
         // Arrange
         var mock = CreateHttpClientFactoryMock(HttpStatusCode.OK, null);

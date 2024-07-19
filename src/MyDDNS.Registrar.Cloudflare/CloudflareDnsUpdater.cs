@@ -4,6 +4,7 @@ using MyDDNS.Core.Dns;
 using MyDDNS.Registrar.Cloudflare.Api;
 using MyDDNS.Registrar.Cloudflare.Api.Models;
 using MyDDNS.Registrar.Cloudflare.Api.Requests;
+using MyDDNS.Registrar.Cloudflare.Api.Responses;
 using MyDDNS.Registrar.Cloudflare.Configuration;
 
 namespace MyDDNS.Registrar.Cloudflare;
@@ -15,7 +16,7 @@ public class CloudflareDnsUpdater : IDnsUpdater
 {
     private readonly ILogger<CloudflareDnsUpdater> _logger;
     private readonly ICloudflareApiAdapter _cloudflareApi;
-    private readonly IEnumerable<CloudflareDomainConfiguration> _domains;
+    private readonly IEnumerable<CloudflareDomainConfig> _domains;
 
     /// <summary>
     /// Creates the <see cref="CloudflareDnsUpdater"/>.
@@ -28,7 +29,7 @@ public class CloudflareDnsUpdater : IDnsUpdater
     public CloudflareDnsUpdater(
         ILogger<CloudflareDnsUpdater> logger,
         ICloudflareApiAdapter cloudflareApi,
-        IEnumerable<CloudflareDomainConfiguration> domains)
+        IEnumerable<CloudflareDomainConfig> domains)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _cloudflareApi = cloudflareApi ?? throw new ArgumentNullException(nameof(cloudflareApi));
@@ -37,7 +38,7 @@ public class CloudflareDnsUpdater : IDnsUpdater
         if (!domains.Any())
             throw new ArgumentException("At least one domain must be specified.", nameof(domains));
     }
-    
+
     /// <inheritdoc />
     public async Task UpdateDnsAsync(IPAddress ip, CancellationToken cancellationToken = default)
     {
@@ -45,6 +46,9 @@ public class CloudflareDnsUpdater : IDnsUpdater
         {
             var response = await _cloudflareApi.GetDnsRecordsAsync(domain.ApiToken, domain.ZoneIdentifier,
                 domain.RecordName, cancellationToken);
+
+            if (CheckResponseErrors(response))
+                continue;
 
             if (response?.Result == null)
             {
@@ -65,14 +69,14 @@ public class CloudflareDnsUpdater : IDnsUpdater
         }
     }
 
-    private async Task PatchDnsRecordAsync(List<CloudflareDnsRecord> records, CloudflareDomainConfiguration domain,
+    private async Task PatchDnsRecordAsync(List<CloudflareDnsRecord> records, CloudflareDomainConfig domain,
         IPAddress ip, CancellationToken cancellationToken)
     {
         foreach (var record in records)
         {
             if (record.Content == ip.ToString())
             {
-                _logger.LogInformation("Skipping update: IP {Ip} for {Domain} has not changed.",
+                _logger.LogInformation("Skipping update: IP {Ip} for {Domain} is already set.",
                     ip, record.Name);
                 continue;
             }
@@ -89,14 +93,43 @@ public class CloudflareDnsUpdater : IDnsUpdater
                 Type = record.Type
             };
 
-            var patchResponse = await _cloudflareApi.PatchDnsRecordAsync(domain.ApiToken, domain.ZoneIdentifier,
+            var response = await _cloudflareApi.PatchDnsRecordAsync(domain.ApiToken, domain.ZoneIdentifier,
                 record.Id!, payload, cancellationToken);
 
-            if (patchResponse is not { Success: true })
+            if (CheckResponseErrors(response))
+                continue;
+
+            if (response is { Success: true })
+            {
+                _logger.LogInformation("IP {OldIp} was replaced by {NewIp} for {Domain} via Cloudflare API.",
+                    record.Content, ip, record.Name);
+            }
+            else
             {
                 _logger.LogError("Failed to replace IP {OldIp} by {NewIp} for {Domain} via Cloudflare API.",
                     record.Content, ip, record.Name);
             }
         }
+    }
+
+    /// <summary>
+    /// Verifies and logs possible errors that can come in the response
+    /// </summary>
+    /// <param name="response">The parsed response from Cloudflare API.</param>
+    /// <typeparam name="TResult">The response Result type.</typeparam>
+    /// <returns>A boolean telling if there were any errors.</returns>
+    private bool CheckResponseErrors<TResult>(CloudflareResponse<TResult>? response)
+    {
+        if (response is { Success: true })
+            return false;
+
+        var logMessage = response == null
+            ? "Response was NULL"
+            : response.Errors == null
+                ? "Response.Errors was NULL"
+                : string.Join(", ", response.Errors.Select(err => $"{err.Code} - {err.Message}"));
+
+        _logger.LogError("Found one or more errors in Cloudflare API response: {Message}", logMessage);
+        return true;
     }
 }

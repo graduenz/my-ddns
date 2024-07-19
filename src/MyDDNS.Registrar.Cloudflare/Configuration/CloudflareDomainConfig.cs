@@ -3,17 +3,17 @@
 /// <summary>
 /// A record that contains the DNS updating configuration for a domain on Cloudflare.
 /// </summary>
-public class CloudflareDomainConfiguration
+public class CloudflareDomainConfig
 {
     /// <summary>
-    /// Creates the <see cref="CloudflareDomainConfiguration"/>.
+    /// Creates the <see cref="CloudflareDomainConfig"/>.
     /// </summary>
     /// <param name="apiToken">The API token.</param>
     /// <param name="zoneIdentifier">The zone identifier.</param>
     /// <param name="recordName">The record name.</param>
     /// <param name="proxied">Record is proxied or not.</param>
     /// <param name="ttl">Record TTL.</param>
-    public CloudflareDomainConfiguration(string apiToken, string zoneIdentifier, string recordName,
+    public CloudflareDomainConfig(string apiToken, string zoneIdentifier, string recordName,
         bool proxied, int ttl)
     {
         ApiToken = apiToken;

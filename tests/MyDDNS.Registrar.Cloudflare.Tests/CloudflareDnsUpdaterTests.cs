@@ -26,7 +26,7 @@ public class CloudflareDnsUpdaterTests
     [Theory]
     [MemberData(nameof(Ctor_WhenNullParams_Throws_Data))]
     public void Ctor_WhenNullParams_Throws(ILogger<CloudflareDnsUpdater> logger, ICloudflareApiAdapter cloudflareApi,
-        List<CloudflareDomainConfiguration> domains)
+        List<CloudflareDomainConfig> domains)
     {
         // Act
         var act = () => new CloudflareDnsUpdater(logger, cloudflareApi, domains);
@@ -40,7 +40,7 @@ public class CloudflareDnsUpdaterTests
     {
         // Act
         var act = () =>
-            new CloudflareDnsUpdater(Logger, CreateApiAdapterMock().Object, new List<CloudflareDomainConfiguration>());
+            new CloudflareDnsUpdater(Logger, CreateApiAdapterMock().Object, new List<CloudflareDomainConfig>());
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -49,7 +49,7 @@ public class CloudflareDnsUpdaterTests
     }
 
     [Theory]
-    [InlineData(true, false, false, false, false, false, LogLevel.Warning)]
+    [InlineData(true, false, false, false, false, false, LogLevel.Error)]
     [InlineData(false, true, false, false, false, false, LogLevel.Warning)]
     [InlineData(false, false, true, false, false, false, LogLevel.Warning)]
     [InlineData(false, false, false, false, true, false, LogLevel.Error)]
@@ -123,9 +123,9 @@ public class CloudflareDnsUpdaterTests
             Times.Once);
     }
 
-    private static List<CloudflareDomainConfiguration> GetTestDomainConfigs() =>
+    private static List<CloudflareDomainConfig> GetTestDomainConfigs() =>
     [
-        new CloudflareDomainConfiguration(
+        new CloudflareDomainConfig(
             "api_token",
             "zone_identifier",
             "rdnz.dev",
