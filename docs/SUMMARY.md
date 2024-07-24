@@ -1,6 +1,6 @@
 # Table of contents
 
-* [About MyDDNS](README.md)
+* [MyDDNS](README.md)
 * [Getting started](getting-started.md)
 
 ## Configuration
